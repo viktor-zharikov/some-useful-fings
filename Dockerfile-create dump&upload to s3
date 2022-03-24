@@ -1,0 +1,21 @@
+FROM alpine:3.14
+
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/testing/" >> /etc/apk/repositories
+RUN apk add --update --no-cache postgresql-client s3cmd curl
+RUN cp -r /usr/lib/python3.10/site-packages/S3 /usr/lib/python3.9/site-packages/
+
+ENV PG_DUMP_FLAGS="-Fp -Z 9 -v"
+
+CMD { export BACKUPNAME="$PGDATABASE.$(date +"%Y-%m-%d-%H-%M-%S").sql.gz"; export BACKUPPATH="/tmp/$BACKUPNAME"; pg_dump $PG_DUMP_FLAGS > $BACKUPPATH; } \
+    || curl --data "text=🔴🔴🔴 Создание дампа не удалось $BACKUPNAME" --data "chat_id=" "https://api.telegram.org/bot<APIKEY>/sendMessage" \
+    && { s3cmd \
+        --host=$S3_ENDPOINT \
+        --access_key=$S3_ACCESS_KEY_ID \
+        --secret_key=$S3_SECRET_ACCESS_KEY \
+        --region=$S3_REGION \
+        --host-bucket=$S3_BUCKET \
+        --acl-private \
+        $OTHER_S3CMD_FLAGS \
+       put $BACKUPPATH "s3://$S3_BUCKET/$BUCKET_PATH/$BACKUPNAME" \
+    && curl --data "text=✅✅✅ Дамп создан и загружен: $S3_BUCKET $BUCKET_PATH $BACKUPNAME" --data "chat_id=" "https://api.telegram.org/bot<APIKEY>/sendMessage" \
+    || curl --data "text=🔴🔴🔴 Выгрузка дампа не удалась $S3_BUCKET $BUCKET_PATH $BACKUPNAME" --data "chat_id=" "https://api.telegram.org/bot<APIKEY>/sendMessage"; }
