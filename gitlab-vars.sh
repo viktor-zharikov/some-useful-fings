@@ -1,6 +1,6 @@
  #!/bin/bash
 token="" #gitlab token for api
-prefix="INTERSTROY_"               #additional prefix for variables
+prefix=""               #additional prefix for variables
 file="VARIABLE_BACKEND.txt"        #file with variables
 project=""         #project in gitlab
 
