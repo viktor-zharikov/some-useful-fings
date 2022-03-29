@@ -36,7 +36,7 @@ fi
 if [[ $Keypress == "2" ]]; then
 echo -e "`cat $file`\e[1;31m\nAHTUNG UPDATE VARIABLE PLEAS WAIT\e[0m"
 ahtung
-work_cycle 'curl --request PUT --header "PRIVATE-TOKEN: $token" "https://gitlab.com/api/v4/projects/$project/variables/$prefixkey" --form "value=$value"' # update variables value
+work_cycle 'curl --request PUT --header "PRIVATE-TOKEN: $token" "https://gitlab.com/api/v4/projects/$project/variables/$prefix$key" --form "value=$value"' # update variables value
 fi
 if [[ $Keypress == "3" ]]; then
 echo -e "`cat $file`\e[1;31m\nAHTUNG DELETED VARIABLE PLEAS WAIT\e[0m"
